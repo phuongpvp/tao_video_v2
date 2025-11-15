@@ -6,7 +6,7 @@ export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
       // BẮT BUỘC THÊM DÒNG NÀY VÀO
-      base: '/tao_video_v2/',
+      base: './', 
 
       server: {
         port: 3000,
