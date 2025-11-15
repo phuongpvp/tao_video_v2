@@ -1,0 +1,5 @@
+{
+  "name": "[OK] Tool tạo Prompt video chuyên nghiệp",
+  "description": "An application to automatically generate video scripts in JSON format based on user-defined parameters like idea, duration, characters, and style.",
+  "requestFramePermissions": []
+}
