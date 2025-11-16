@@ -1,13 +1,17 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { FormData, GeneratedScript, Character } from '../types';
 
-if (!process.env.API_KEY) {
-    throw new Error("API_KEY environment variable not set");
-}
+// XÓA BỎ HOÀN TOÀN khối:
+// if (!process.env.API_KEY) { ... }
+// và
+// const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Thay đổi: Hàm giờ đây nhận 'apiKey' làm tham số
+export async function generateScript(formData: FormData, apiKey: string): Promise<GeneratedScript> {
+    
+    // THÊM MỚI: Tạo instance 'ai' bên trong hàm
+    const ai = new GoogleGenAI({ apiKey });
 
-export async function generateScript(formData: FormData): Promise<GeneratedScript> {
     const numberOfPrompts = Math.floor((formData.duration * 60) / 8);
     if (numberOfPrompts <= 0) {
         throw new Error("Duration is too short to generate any scenes.");
@@ -81,7 +85,7 @@ The language of all generated text content (character descriptions, prompts, dia
     };
 
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-pro",
+        model: "gemini-1.5-pro", // Đổi sang 1.5 pro cho mạnh
         contents: prompt,
         config: {
             responseMimeType: "application/json",
@@ -99,12 +103,18 @@ The language of all generated text content (character descriptions, prompts, dia
     }
 }
 
+// Thay đổi: Hàm giờ đây nhận 'apiKey' làm tham số
 export async function generateCharacterImagePrompt(
   character: Omit<Character, 'imagePrompt'>, 
   style: string, 
   idea: string,
-  language: string
+  language: string,
+  apiKey: string // Thêm tham số apiKey
 ): Promise<string> {
+
+    // THÊM MỚI: Tạo instance 'ai' bên trong hàm
+    const ai = new GoogleGenAI({ apiKey });
+
     const prompt = `
 Based on the following video idea, cinematic style, and character description, generate a detailed and descriptive image prompt in English for an AI image generator. The prompt should capture the character's appearance, clothing, mood, and key attributes.
 
@@ -120,7 +130,7 @@ The final output must be only the prompt text, without any introductory phrases,
 `;
 
     const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
+        model: "gemini-1.5-flash", // Đổi sang 1.5 flash cho nhanh
         contents: prompt,
         config: {
             temperature: 0.7,

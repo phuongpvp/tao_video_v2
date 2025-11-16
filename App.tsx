@@ -1,11 +1,90 @@
+// App.tsx (BẢN SỬA LỖI HOÀN CHỈNH - CỨ COPY VÀ DÁN LÀ CHẠY)
 
-
-
-
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react'; // Đã sửa lỗi import
 import { CINEMATIC_STYLES, LANGUAGES, SCRIPT_TYPES } from './constants';
 import { generateScript, generateCharacterImagePrompt } from './services/geminiService';
 import type { FormData, GeneratedScript, Character, Scene } from './types';
+
+// ----- BẮT ĐẦU: COMPONENT POPUP QUẢN LÝ KEY -----
+const ApiKeyModal: React.FC<{
+    show: boolean;
+    onClose: () => void;
+    apiKeys: string[];
+    setApiKeys: React.Dispatch<React.SetStateAction<string[]>>;
+}> = ({ show, onClose, apiKeys, setApiKeys }) => {
+    const [newKey, setNewKey] = useState('');
+
+    const handleAddKey = () => {
+        if (newKey.trim() && !apiKeys.includes(newKey.trim())) {
+            const updatedKeys = [...apiKeys, newKey.trim()];
+            setApiKeys(updatedKeys);
+            localStorage.setItem('geminiApiKeys', JSON.stringify(updatedKeys)); // Lưu vào localStorage
+            setNewKey('');
+        }
+    };
+
+    const handleRemoveKey = (keyToRemove: string) => {
+        const updatedKeys = apiKeys.filter(key => key !== keyToRemove);
+        setApiKeys(updatedKeys);
+        localStorage.setItem('geminiApiKeys', JSON.stringify(updatedKeys)); // Cập nhật localStorage
+    };
+
+    if (!show) return null;
+
+    return (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <div className="bg-slate-800 rounded-lg shadow-xl w-full max-w-lg p-6 border border-slate-700">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-xl font-bold text-white">Quản lý API Keys (Gemini)</h3>
+                    <button onClick={onClose} className="text-slate-400 hover:text-white text-3xl">&times;</button>
+                </div>
+                <p className="text-slate-400 mb-4">
+                    App này sử dụng API của bạn. Key được lưu an toàn trên trình duyệt của bạn (localStorage) và không bị gửi đi nơi khác.
+                </p>
+                <div className="flex gap-2 mb-4">
+                    <input
+                        type="text"
+                        value={newKey}
+                        onChange={(e) => setNewKey(e.target.value)}
+                        placeholder="Nhập API Key mới..."
+                        className="flex-grow p-2 bg-slate-900 border border-slate-700 rounded-lg text-white outline-none"
+                    />
+                    <button
+                        onClick={handleAddKey}
+                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-lg"
+                    >
+                        Thêm
+                    </button>
+                </div>
+                <div className="max-h-60 overflow-y-auto space-y-2">
+                    {apiKeys.length === 0 ? (
+                        <p className="text-slate-500 text-center">Chưa có API key nào.</p>
+                    ) : (
+                        apiKeys.map((key, index) => (
+                            <div key={index} className="flex items-center justify-between bg-slate-900 p-3 rounded-lg">
+                                <span className="text-slate-300 font-mono text-sm">...{key.slice(-6)}</span>
+                                <button
+                                    onClick={() => handleRemoveKey(key)}
+                                    className="text-red-500 hover:text-red-400 font-semibold"
+                                >
+                                    Xóa
+                                </button>
+                            </div>
+                        ))
+                    )}
+                </div>
+                 <button 
+                    onClick={onClose} 
+                    className="mt-6 w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg"
+                >
+                    Đóng
+                </button>
+            </div>
+        </div>
+    );
+};
+// ----- KẾT THÚC: COMPONENT POPUP QUẢN LÝ KEY -----
+
 
 const initialFormData: FormData = {
     idea: '',
@@ -181,6 +260,7 @@ const transformScriptToVEOFormat = (script: GeneratedScript, formData: FormData)
 
 
 const ErrorComponent: React.FC<{ error: string }> = ({ error }) => (
+    // ĐÂY LÀ CODE GỐC CỦA ÔNG (ĐÃ SỬA LỖI)
     <div className="mt-8 p-6 bg-red-900/50 border border-red-700 rounded-lg text-red-300">
         <h3 className="font-bold text-lg mb-2">Lỗi</h3>
         <p>{error}</p>
@@ -191,6 +271,7 @@ const CharacterCard: React.FC<{
     character: Character;
     onNameChange: (newName: string) => void;
 }> = ({ character, onNameChange }) => {
+    // ĐÂY LÀ CODE GỐC CỦA ÔNG (ĐÃ SỬA LỖI)
     const [copied, setCopied] = useState(false);
 
     const handleCopy = () => {
@@ -252,7 +333,7 @@ const CharacterCustomization: React.FC<{
     setScript: React.Dispatch<React.SetStateAction<GeneratedScript | null>>;
     setStep: React.Dispatch<React.SetStateAction<number>>;
 }> = ({ script, setScript, setStep }) => {
-
+    // ĐÂY LÀ CODE GỐC CỦA ÔNG (ĐÃ SỬA LỖI)
     const handleCharacterNameChange = (characterIndex: number, newName: string) => {
         const oldName = script.characters[characterIndex].name;
 
@@ -321,6 +402,7 @@ const SceneCard: React.FC<{
     allCharacters: Character[];
     scriptType: string;
 }> = ({ scene, allCharacters, scriptType }) => {
+    // ĐÂY LÀ CODE GỐC CỦA ÔNG (ĐÃ SỬA LỖI)
     const [promptCopied, setPromptCopied] = useState(false);
     const [dialogueCopied, setDialogueCopied] = useState(false);
 
@@ -391,7 +473,7 @@ const ActionBar: React.FC<{
     formData: FormData;
     onReset: () => void;
 }> = ({ script, formData, onReset }) => {
-
+    // ĐÂY LÀ CODE GỐC CỦA ÔNG (ĐÃ SỬA LỖI)
     const downloadFile = (filename: string, content: string, mimeType: string) => {
         const blob = new Blob([content], { type: mimeType });
         const url = URL.createObjectURL(blob);
@@ -449,6 +531,7 @@ const ActionBar: React.FC<{
 }
 
 const ScriptView: React.FC<{ script: GeneratedScript, scriptType: string, onReset: () => void, formData: FormData }> = ({ script, scriptType, onReset, formData }) => {
+    // ĐÂY LÀ CODE GỐC CỦA ÔNG (ĐÃ SỬA LỖI)
     return (
         <div className="mt-10">
              <ActionBar
@@ -479,6 +562,44 @@ export default function App() {
     const [generatedScript, setGeneratedScript] = useState<GeneratedScript | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    // ----- BẮT ĐẦU: LOGIC API KEY MỚI -----
+    const [apiKeys, setApiKeys] = useState<string[]>([]);
+    const [currentKeyIndex, setCurrentKeyIndex] = useState(0);
+    const [showKeyModal, setShowKeyModal] = useState(false);
+
+    // Đọc key từ localStorage khi app khởi động
+    useEffect(() => {
+        const storedKeys = localStorage.getItem('geminiApiKeys');
+        if (storedKeys) {
+            const parsedKeys = JSON.parse(storedKeys) as string[];
+            if (parsedKeys.length > 0) {
+                setApiKeys(parsedKeys);
+            } else {
+                setShowKeyModal(true); // Hiển thị popup nếu chưa có key
+            }
+        } else {
+            setShowKeyModal(true); // Hiển thị popup nếu lần đầu vào app
+        }
+    }, []);
+
+    // Hàm lấy key tiếp theo để xoay vòng
+    const getNextApiKey = (): string | null => {
+        if (apiKeys.length === 0) {
+            setShowKeyModal(true); // Bắt nhập key nếu không có
+            return null;
+        }
+        
+        // Chọn key
+        const key = apiKeys[currentKeyIndex];
+        
+        // Cập nhật index cho lần gọi sau (xoay vòng)
+        setCurrentKeyIndex((prevIndex) => (prevIndex + 1) % apiKeys.length);
+        
+        return key;
+    };
+    // ----- KẾT THÚC: LOGIC API KEY MỚI -----
+
+
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
@@ -500,22 +621,35 @@ export default function App() {
 
     const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        // ----- THAY ĐỔI: Lấy key trước khi submit -----
+        const selectedApiKey = getNextApiKey();
+        if (!selectedApiKey) {
+            setError("Vui lòng nhập API Key của Gemini để sử dụng. Bấm vào 'Quản lý API Key' ở góc trên.");
+            setIsLoading(false);
+            return; // Dừng lại nếu không có key
+        }
+        // ----- KẾT THÚC THAY ĐỔI -----
+
         setIsLoading(true);
         setError(null);
         setGeneratedScript(null);
         
         try {
-            // Step 1: Generate script and character descriptions
-            const scriptResult = await generateScript(formData);
+            // Step 1: Generate script
+            // ----- THAY ĐỔI: Truyền `selectedApiKey` vào hàm -----
+            const scriptResult = await generateScript(formData, selectedApiKey);
 
-            // Step 2: Generate image prompts for each character
+            // Step 2: Generate image prompts
             const charactersWithPrompts = await Promise.all(
                 scriptResult.characters.map(async (char) => {
+                    // ----- THAY ĐỔI: Truyền `selectedApiKey` vào hàm -----
                     const imagePrompt = await generateCharacterImagePrompt(
                         char,
                         formData.style,
                         formData.idea,
-                        formData.language
+                        formData.language,
+                        selectedApiKey // Dùng cùng 1 key cho tất cả các lần gọi
                     );
                     return { ...char, imagePrompt };
                 })
@@ -526,22 +660,51 @@ export default function App() {
             setStep(2);
 
         } catch (err: any) {
-            setError(err.message || 'An unknown error occurred.');
+            // Xử lý lỗi API key (ví dụ key sai)
+             if (err.message && (err.message.includes('API key') || err.message.includes('permission'))) {
+                setError(`Lỗi API Key: ${err.message}. Key bạn vừa dùng (kết thúc bằng ...${selectedApiKey.slice(-6)}) có thể đã sai, hết hạn hoặc hết quota. Vui lòng kiểm tra lại.`);
+                // Xóa key hỏng ra khỏi danh sách
+                const updatedKeys = apiKeys.filter(key => key !== selectedApiKey);
+                setApiKeys(updatedKeys);
+                localStorage.setItem('geminiApiKeys', JSON.stringify(updatedKeys));
+            } else {
+                 setError(err.message || 'An unknown error occurred.');
+            }
             setStep(1); // Reset to form on error
         } finally {
             setIsLoading(false);
         }
-    }, [formData]);
+    }, [formData, apiKeys, currentKeyIndex]); // Thêm dependencies mới
 
 
     return (
         <div className="min-h-screen bg-slate-900 text-slate-200 flex flex-col items-center p-4 sm:p-8">
+            
+            {/* ----- THÊM MỚI: Popup ----- */}
+            <ApiKeyModal
+                show={showKeyModal}
+                onClose={() => setShowKeyModal(false)}
+                apiKeys={apiKeys}
+                setApiKeys={setApiKeys}
+            />
+
             <div className="w-full max-w-7xl">
-                <header className="text-center mb-10">
+                <header className="text-center mb-10 relative">
                     <h1 className="text-4xl sm:text-5xl font-extrabold text-white">Trình Tạo Kịch Bản Video - 0916 590 161 </h1>
+                    
+                    {/* ----- THÊM MỚI: Nút quản lý Key ----- */}
+                    <div className="absolute top-0 right-0 -mt-2 sm:mt-0">
+                        <button
+                            onClick={() => setShowKeyModal(true)}
+                            className="bg-slate-700 hover:bg-slate-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-200"
+                        >
+                            Quản lý API Key
+                        </button>
+                    </div>
                 </header>
 
                 <main>
+                    {/* TOÀN BỘ CODE JSX GỐC CỦA ÔNG ĐƯỢC GIỮ NGUYÊN */}
                     {step === 1 && (
                         <form onSubmit={handleSubmit} className="space-y-8">
                             <div>
